@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.moms.test.momsitterapi.auth.JwtTokenProvider;
 import com.moms.test.momsitterapi.global.domain.*;
 import com.moms.test.momsitterapi.member.dto.ResponseMemberInfoDTO;
 import com.moms.test.momsitterapi.member.mapper.MemberMapper;
@@ -42,13 +43,17 @@ public class MemberService {
     }};
 
     private final MemberMapper memberMapper;
-//    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
-    public void addRole(String userIdx, RequestDTO addRoleRequestDTO) throws Exception {
+    public String addRole(RequestDTO addRoleRequestDTO, String bearerToken) throws Exception {
 //        String roles = jwtTokenProvider.getRoleFromBearerToken(bearerToken);
+
+        String userIdx = jwtTokenProvider.getUserIdxFromBearerToken(bearerToken);
+        log.debug("user idx from token : {}", userIdx);
+        // temp
         Long idx = Long.valueOf(userIdx);
-        String roles = memberMapper.findAccountByUserIdx(idx)
+        String roles = memberMapper.findAccountByUserIdx(userIdx)
                                    .get()
                                    .getRole();
 
@@ -84,11 +89,14 @@ public class MemberService {
         if (re != 1) {
             throw new Exception("internal server error in update account");
         }
+
+        return userIdx;
     }
 
     @Transactional
-    public void modifyInfo(String userIdx, JsonNode payload) {
-        Long idx = Long.valueOf(userIdx);
+    public String modifyInfo(JsonNode payload, String bearerToken) {
+        String userIdx = jwtTokenProvider.getUserIdxFromBearerToken(bearerToken);
+        log.debug("user idx from token : {}", userIdx);
 
         // extract json
         ObjectMapper jsonMapper = new JsonMapper();
@@ -137,14 +145,14 @@ public class MemberService {
         log.debug("account update info : {}", updateInfoJson);
 
         // update account
-        memberMapper.modifyUserInfo(idx, jsonMapper.convertValue(updateInfoJson, HashMap.class));
+        memberMapper.modifyUserInfo(userIdx, jsonMapper.convertValue(updateInfoJson, HashMap.class));
         log.debug("success update account");
 
 
         // update sitter
         if (sitterJson != null) {
             log.debug("sitter update info : {}", sitterJson);
-            memberMapper.modifySitter(idx, jsonMapper.convertValue(sitterJson, HashMap.class));
+            memberMapper.modifySitter(userIdx, jsonMapper.convertValue(sitterJson, HashMap.class));
             log.debug("success update sitter");
         }
 
@@ -159,21 +167,23 @@ public class MemberService {
                     throw new InvalidParameterException("Non exist child index");
                 }
                 log.debug("update child info : {}", child);
-                Long childIdx = Long.valueOf(child.remove(STR_childIdx).toString());
-                memberMapper.modifyChild(idx, childIdx, child);
+                String childIdx = child.remove(STR_childIdx).toString();
+                memberMapper.modifyChild(userIdx, childIdx, child);
             }
             log.debug("success update children");
         }
+
+        return userIdx;
     }
 
-    public ResponseMemberInfoDTO getMemberInfo(String userIdx) throws Exception {
-        log.debug("start get member info / userIdx : {}", userIdx);
-        Long idx = Long.valueOf(userIdx);
+    public ResponseMemberInfoDTO getMemberInfo(String bearerToken) throws Exception {
+        String userIdx = jwtTokenProvider.getUserIdxFromBearerToken(bearerToken);
+        log.debug("user idx from token : {}", userIdx);
 
-        Optional<ResponseMemberInfoDTO> responseDTOOpt = memberMapper.findAccountInfoByUserIdx(idx);
+        Optional<ResponseMemberInfoDTO> responseDTOOpt = memberMapper.findAccountInfoByUserIdx(userIdx);
 
         if (!responseDTOOpt.isPresent()) {
-            log.warn("Internal Server Error / Fail to member info by userIdx : {}", idx);
+            log.warn("Internal Server Error / Fail to member info by userIdx : {}", userIdx);
             throw new Exception("Internal Server Error / Fail to member info by userIdx");
         }
 
@@ -183,7 +193,7 @@ public class MemberService {
 
             ROLE role = ROLE.valueOf(roleStr.toUpperCase());
             if (role == ROLE.USER) {
-                List<ChildDTO> children = memberMapper.findChildrenByUserIdx(idx);
+                List<ChildDTO> children = memberMapper.findChildrenByUserIdx(userIdx);
 
                 if (children == null) {
                     children = new ArrayList<>();
@@ -192,7 +202,7 @@ public class MemberService {
                 UserInfoDTO additionalInfo = new UserInfoDTO(children, response.getReqInfo());
                 response.setUser(additionalInfo);
             } else if (role == ROLE.SITTER) {
-                SitterDTO sitter = memberMapper.findSitterInfoByUserIdx(idx);
+                SitterDTO sitter = memberMapper.findSitterInfoByUserIdx(userIdx);
 
                 response.setSitter(sitter);
             }
@@ -212,13 +222,18 @@ public class MemberService {
         }
     }
 
-    public void createChildren(String userIdx, List<ChildDTO> children) throws Exception {
+    public void createChildren(List<ChildDTO> children, String bearerToken) throws Exception {
+        String userIdx = jwtTokenProvider.getUserIdxFromBearerToken(bearerToken);
+        log.debug("user idx from token : {}", userIdx);
+
         createChildren(Long.valueOf(userIdx), children);
     }
 
-    public void deleteChild(String userIdx, String childIdx) throws Exception {
+    public void deleteChild(String childIdx, String bearerToken) throws Exception {
+        String userIdx = jwtTokenProvider.getUserIdxFromBearerToken(bearerToken);
+        log.debug("user idx from token : {}", userIdx);
 
-        int re = memberMapper.deleteChild(Long.valueOf(userIdx), Long.valueOf(childIdx));
+        int re = memberMapper.deleteChild(userIdx, childIdx);
         log.debug("delete child result : {}", re);
 
         if (re != 1) {

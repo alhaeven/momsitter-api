@@ -19,26 +19,26 @@ public interface MemberMapper {
     int createChild(Long userIdx, List<ChildDTO> children);
 
     @Select("SELECT user_idx, user_id, password, role FROM account WHERE user_idx = #{userIdx}")
-    Optional<ResponseMemberInfoDTO> findAccountByUserIdx(Long userIdx);
+    Optional<ResponseMemberInfoDTO> findAccountByUserIdx(String userIdx);
 
     @Select("SELECT user_idx, user_id, role, name, birth, gender, email, req_info FROM account WHERE user_idx = #{userIdx}")
-    Optional<ResponseMemberInfoDTO> findAccountInfoByUserIdx(Long userIdx);
+    Optional<ResponseMemberInfoDTO> findAccountInfoByUserIdx(String userIdx);
 
     @Select("SELECT * FROM child WHERE user_idx = #{userIdx}")
-    List<ChildDTO> findChildrenByUserIdx(Long userIdx);
+    List<ChildDTO> findChildrenByUserIdx(String userIdx);
 
     @Select("SELECT coverage_min, coverage_max, intro FROM sitter WHERE user_idx = #{userIdx}")
-    SitterDTO findSitterInfoByUserIdx(Long userIdx);
+    SitterDTO findSitterInfoByUserIdx(String userIdx);
 
     @Update("UPDATE account SET role = #{role}, req_info = #{reqInfo, jdbcType=VARCHAR} WHERE user_idx = #{userIdx}")
     int modifyUserInfoForAddRole(FlatRequestDTO addRoleDTO);
 
-    int modifyUserInfo(Long userIdx, Map<String, Object> jsonMap);
+    int modifyUserInfo(String userIdx, Map<String, Object> jsonMap);
 
-    int modifySitter(Long userIdx, Map sitterMap);
+    int modifySitter(String userIdx, Map sitterMap);
 
-    int modifyChild(Long userIdx, Long childIdx, Map child);
+    int modifyChild(String userIdx, String childIdx, Map child);
 
     @Delete("DELETE FROM child WHERE user_idx = #{userIdx} AND child_idx = #{childIdx}")
-    int deleteChild(Long userIdx, Long childIdx);
+    int deleteChild(String userIdx, String childIdx);
 }

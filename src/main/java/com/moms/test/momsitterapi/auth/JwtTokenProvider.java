@@ -172,13 +172,15 @@ public class JwtTokenProvider {
         return null;
     }
 
-    public String getRoleFromBearerToken(String bearerToken) {
+    public String getUserIdxFromBearerToken(String bearerToken) {
         String token = resolveToken(bearerToken);
 
-        Claims claims = parseClaims(token);
-
-        return claims.get(JwtProperties.TOKEN_AUTH)
-                     .toString();
+//        Claims claims = parseClaims(token);
+//
+//        return claims.get(JwtProperties.TOKEN_AUTH)
+//                     .toString();
+        String subject = parseSubject(token);
+        return subject;
     }
 
 }

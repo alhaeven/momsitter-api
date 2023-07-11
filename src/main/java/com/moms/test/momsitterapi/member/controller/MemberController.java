@@ -2,12 +2,12 @@ package com.moms.test.momsitterapi.member.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moms.test.momsitterapi.auth.config.JwtProperties;
 import com.moms.test.momsitterapi.auth.dto.CommonResponse;
 import com.moms.test.momsitterapi.global.domain.RequestDTO;
 import com.moms.test.momsitterapi.global.domain.UserInfoDTO;
 import com.moms.test.momsitterapi.member.dto.ResponseMemberInfoDTO;
 import com.moms.test.momsitterapi.member.service.MemberService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,16 +26,16 @@ public class MemberController {
 
     private final MemberService memberService;
 
-//    @Operation(summary = "Member", description = "add Role")
-    @PutMapping("/{userIdx}")
-    public ResponseEntity addRole(@PathVariable("userIdx") String userIdx, @RequestBody RequestDTO requestDTO
-            /*,@RequestHeader(JwtProperties.AUTHORIZATION_HEADER) String bearerToken*/) {
+    //    @Operation(summary = "Member", description = "add Role")
+    @PutMapping
+    public ResponseEntity addRole(@RequestBody RequestDTO requestDTO
+            , @RequestHeader(JwtProperties.AUTHORIZATION_HEADER) String bearerToken) {
 
         log.info("addRole method in MemeberController");
         log.debug("addRole request : {}", requestDTO);
         ResponseEntity responseEntity = null;
         try {
-            memberService.addRole(userIdx, requestDTO);
+            String userIdx = memberService.addRole(requestDTO, bearerToken);
             log.info("success add role / idx : {}", userIdx);
 
             CommonResponse response = CommonResponse.builder()
@@ -59,13 +59,14 @@ public class MemberController {
         return responseEntity;
     }
 
-    @PatchMapping("/{userIdx}")
-    public ResponseEntity modifyInfo(@PathVariable("userIdx") String userIdx, @RequestBody JsonNode payload) {
+    @PatchMapping
+    public ResponseEntity modifyInfo(@RequestBody JsonNode payload,
+             @RequestHeader(JwtProperties.AUTHORIZATION_HEADER) String bearerToken) {
         log.info("modifyInfo method in MemeberController");
-        log.debug("modifyInfo userIdx : {} / request payload: {}", userIdx, payload);
+        log.debug("modifyInfo request payload: {}", payload);
         ResponseEntity responseEntity = null;
         try {
-            memberService.modifyInfo(userIdx, payload);
+            String userIdx = memberService.modifyInfo(payload, bearerToken);
             log.info("success modify info | idx : {}", userIdx);
 
             CommonResponse response = CommonResponse.builder()
@@ -89,14 +90,13 @@ public class MemberController {
         return responseEntity;
     }
 
-    @GetMapping("/{userIdx}")
-    public ResponseEntity getInfo(@PathVariable("userIdx") String userIdx) {
+    @GetMapping
+    public ResponseEntity getInfo(@RequestHeader(JwtProperties.AUTHORIZATION_HEADER) String bearerToken) {
         log.info("getInfo method in MemberController");
-        log.debug("userIdx resource : {}", userIdx);
 
         ResponseEntity responseEntity = null;
         try {
-            ResponseMemberInfoDTO responseDTO = memberService.getMemberInfo(userIdx);
+            ResponseMemberInfoDTO responseDTO = memberService.getMemberInfo(bearerToken);
 
             log.info("success get info / {}", new ObjectMapper().writeValueAsString(responseDTO));
 
@@ -121,14 +121,15 @@ public class MemberController {
         return responseEntity;
     }
 
-    @PutMapping("/{userIdx}/child")
-    public ResponseEntity addChildren(@PathVariable("userIdx") String userIdx, @RequestBody UserInfoDTO requestDTO) {
+    @PutMapping("/child")
+    public ResponseEntity addChildren(@RequestBody UserInfoDTO requestDTO,
+                                      @RequestHeader(JwtProperties.AUTHORIZATION_HEADER) String bearerToken) {
         log.info("add children method in MemberController");
-        log.debug("add children userIdx : {} / request : {}", userIdx, requestDTO);
+        log.debug("add children request : {}", requestDTO);
 
         ResponseEntity responseEntity = null;
         try {
-            memberService.createChildren(userIdx, requestDTO.getChildren());
+            memberService.createChildren(requestDTO.getChildren(), bearerToken);
 
             CommonResponse response = CommonResponse.builder()
                                                     .success(true)
@@ -151,15 +152,15 @@ public class MemberController {
         return responseEntity;
     }
 
-    @DeleteMapping("/{userIdx}/child/{childIdx}")
-    public ResponseEntity deleteChild(@PathVariable("userIdx") String userIdx,
-                                      @PathVariable("childIdx") String childIdx) {
+    @DeleteMapping("/child/{childIdx}")
+    public ResponseEntity deleteChild( @PathVariable("childIdx") String childIdx,
+                                       @RequestHeader(JwtProperties.AUTHORIZATION_HEADER) String bearerToken) {
         log.info("delete children method in MemberController");
-        log.debug("delete children userIdx : {} / childIdx : {}", userIdx, childIdx);
+        log.debug("delete children childIdx : {}", childIdx);
 
         ResponseEntity responseEntity = null;
         try {
-            memberService.deleteChild(userIdx, childIdx);
+            memberService.deleteChild(childIdx, bearerToken);
 
             CommonResponse response = CommonResponse.builder()
                                                     .success(true)

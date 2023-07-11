@@ -21,6 +21,7 @@ public class Account implements UserDetails {
 
     private static final String STR_DEFAULT_ROLE = "USER";
 
+    private String userIdxStr;
     private Long userIdx;
     private String userId;
     private String password;
@@ -51,7 +52,10 @@ public class Account implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.userId;
+        if(userIdxStr == null) {
+            userIdxStr = userIdx + "";
+        }
+        return this.userIdxStr;
     }
 
     @Override
