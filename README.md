@@ -180,7 +180,7 @@ Body
 }
 ```
 
-### [PUT] /api/member/{userIdx}
+### [PUT] /api/member/
 - 역할 추가
 - 인증 Token 필요
 - Request
@@ -208,7 +208,7 @@ Authrization : Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJxd2VycnIiLCJhdXRoIjoic2l0d
 }
 ```
 
-### [PATCH] /api/member/{userIdx}
+### [PATCH] /api/member/
 - 회원 정보 수정
 - 인증 Token 필요
 - Request
@@ -241,7 +241,7 @@ Authrization : Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJxd2VycnIiLCJhdXRoIjoic2l0d
 }
 ```
 
-### [GET] /api/member/{userIdx}
+### [GET] /api/member/
 - 회원 정보 조회
 - Resource userIdx를 통해 DB조회
 - 인증 Token 필요
@@ -283,7 +283,7 @@ Authrization : Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJxd2VycnIiLCJhdXRoIjoic2l0d
 }
 ```
 
-### [PUT] /api/member/{userIdx}/child
+### [PUT] /api/member/child
 - 자녀 정보 추가
 - 인증 Token 필요
 - Request
@@ -302,7 +302,7 @@ Authrization : Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJxd2VycnIiLCJhdXRoIjoic2l0d
 }
 ```
 
-### [DELETE] /api/member/{userIdx}/child/{childIdx}
+### [DELETE] /api/member/child/{childIdx}
 - 자녀 정보 삭제
 - 인증 Token 필요
 - Resource userIdx와 chlidIdx를 통해 삭제
